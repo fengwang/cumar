@@ -1,13 +1,12 @@
 CUMAR (CUda MApReduce) is an easy to use library helps to develop [MapReduce](https://www.wikiwand.com/en/MapReduce) algorithms in pure C++.
+
 With this library, the super powers of [CUDA](https://www.wikiwand.com/en/CUDA) are utilized and the coders are rescued from undescriptable __nvcc__ features/bugs, hopefully.
 
 ### Examples
 
-#### __Map__
+#### __Map__ (designed for __[map](http://www.wikiwand.com/en/Map_(higher-order_function)) n lists__).
 
-The `map` is basically for __[map](http://www.wikiwand.com/en/Map_(higher-order_function)) n lists__.
-
-A very common `c = a + b + 1.0` example.
+A very primitive `c = a + b + 1.0` example.
 
 ```c++
 #include "../include/cumar.hpp"
@@ -42,12 +41,12 @@ int main()
 }
 ```
 
-In the example above, the important steps are
+The important steps are
 
-- copy contents in host vector `a` to device with a simple clone operation `double* a_ = host_to_device_clone(a.data(), a.data()+n);`, and the returned pointer, `a_`, holds device memory;
+- copy contents from host vector `a` to device with a simple clone operation `double* a_ = host_to_device_clone(a.data(), a.data()+n);`, returning a device pointer holding device memory;
 - copy contents of host vector `b` to device;
-- create memory for device pointer `c_` with a device allocation `double* c_ = allocate<double>(n);`
-- execute `map` operation, each element triplet applies a string lambda `[](double a, double b, double& c){ c = a + b + 1.0; }` . In a plain C++ view, is is equivalent to 
+- create memory for device pointer `c_`, with a device allocation `double* c_ = allocate<double>(n);`
+- execute `map` operation, each element triplet applies a string lambda `[](double a, double b, double& c){ c = a + b + 1.0; }` . In a plain C++ view, this is equivalent to
 
 ```c++
 for ( unsigned long i = 0; i != n; ++i )
@@ -57,27 +56,27 @@ for ( unsigned long i = 0; i != n; ++i )
 - copy computation result from device (pinter `c_`) to host (vector `a`) with `device_to_host_copy( c_, c_+n, a.data() );`
 
 
-The `map` funcion works with arbitrary numbers of arguments (but at least one)
+The `map` funcion works with arbitrary positive numbers of arguments
 
 + for `a = b + c + d + e + f + g + h`, the `map` step will look like
 
 		map()()( "[](double& a, double b, double c, double d, double e, double f, double g  double h ){ a = b + c + d + e + f + g + h; " )( a, b, c, d, e, f, g );
 
-To take care of additional captured variables, the arguments inside the second bracket is supposed to be employed
+To take care of additional variables attained from context, place their symobls and values in the second bracket
 
-+ for `a = b * x + c * y + z`, where `x`, `y` and `z` are constant, the corresponding code will look like
++ for `a = b * x + c * y + z`, where `x`, `y` and `z` are constant variables, the corresponding code example takes a form of
 
 ```C++
 	double x = 1.0;
 	double y = 2.0;
 	double z = 3.0;
-	map()("x", x, "y", y, "z", z)( "[](double& a, double b, double c){ a = b*x + c*y + z; }" )( a, b, c ); 
+	map()("x", x, "y", y, "z", z)( "[](double& a, double b, double c){ a = b*x + c*y + z; }" )( a, b, c );
 ```
 
 
-#### __Reduce__
+#### __Reduce__ (without initial value)
 
-A very simple example
+A very simple example to pick up the maximum value from a vector
 
 ```C++
 #include "../include/cumar.hpp"
@@ -107,12 +106,11 @@ int main()
 
 The important steps are
 
-- generate a vector containing `1, 2, 3, ..., n` with `std::generator` and a lambda object;
-- copy contents of this vector to device, returns a pointer, `a_`, holding the device memory;
-- execute fold operation `max` from the string lambda, `"[]( double a, double b ){ return a>b?a:b; }"`, which is equivalent to
+- generate a vector holding `1, 2, 3, ..., n`, by employing  `std::generator` and a lambda object;
+- copy contents of this vector to device memory, returns a device pointer;
+- execute fold operation `max` from a string lambda, `"[]( double a, double b ){ return a>b?a:b; }"`, which is equivalent to
 
 		double red = max( a[0], max( a[1], max( a[2], ... ) ) );
-
 
 ### Implementation Details
 
@@ -126,5 +124,5 @@ TODO
 + Arch Linux, clang++ 3.9.0, CUDA version 8.0.44
 + Ubuntu Linux, clang++ 3.6.0, CUDA version 7.0.27
 
- 
+
 
