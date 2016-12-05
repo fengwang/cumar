@@ -1,5 +1,5 @@
-CUMAR (CUda MApReduce) is an easy to use library helps to develop [MapReduce](https://www.wikiwand.com/en/MapReduce) algorithm in pure C++.
-With this library, the power of [CUDA](https://www.wikiwand.com/en/CUDA) is utilized and the coder is rescued from undescriptable __nvcc__ features/bugs, hopefully.
+CUMAR (CUda MApReduce) is an easy to use library helps to develop [MapReduce](https://www.wikiwand.com/en/MapReduce) algorithms in pure C++.
+With this library, the super powers of [CUDA](https://www.wikiwand.com/en/CUDA) are utilized and the coders are rescued from undescriptable __nvcc__ features/bugs, hopefully.
 
 ### Examples
 
