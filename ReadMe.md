@@ -1,5 +1,5 @@
 CUMAR (CUda MApReduce) is an easy to use library helps to develop [MapReduce](https://www.wikiwand.com/en/MapReduce) algorithm in pure C++.
-With this library, hopefully, the power of [CUDA](https://www.wikiwand.com/en/CUDA) is utilized and the coder is rescued from undescriptable __nvcc__ features/bugs.
+With this library, the power of [CUDA](https://www.wikiwand.com/en/CUDA) is utilized and the coder is rescued from undescriptable __nvcc__ features/bugs, hopefully.
 
 ### Examples
 
@@ -32,7 +32,7 @@ int main()
     map()()( "[](double a, double b, double& c){ c = a + b + 1.0; }" )( a_, a_+n, b_, c_ );
 
     device_to_host_copy( c_, c_+n, a.data() );
-    std::cout << "Test Case 1: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << n << " expected.\n";
+    std::cout << "Map Test: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << n << " expected.\n";
 
     deallocate( a_ );
     deallocate( b_ );
@@ -97,7 +97,7 @@ int main()
     double* a_ = host_to_device_clone( a.data(), a.data()+n );
     double red = reduce()()( "[]( double a, double b ){ return a>b?a:b; }" )( a_, a_+n );
 
-    std::cout << "Reduce test 10: " << red << " -- " << n << " expected.\n";
+    std::cout << "Reduce test: " << red << " -- " << n << " expected.\n";
 
     deallocate( a_ );
 
@@ -105,11 +105,11 @@ int main()
 }
 ```
 
-The important steps of the example above are
+The important steps are
 
-- generate a vector of `1, 2, 3, ..., n` with `std::generator`;
+- generate a vector containing `1, 2, 3, ..., n` with `std::generator` and a lambda object;
 - copy contents of this vector to device, returns a pointer, `a_`, holding the device memory;
-- execute fold operation `max`, from a string lambda `"[]( double a, double b ){ return a>b?a:b; }"`, this is equivalent to
+- execute fold operation `max` from the string lambda, `"[]( double a, double b ){ return a>b?a:b; }"`, which is equivalent to
 
 		double red = max( a[0], max( a[1], max( a[2], ... ) ) );
 
@@ -118,4 +118,13 @@ The important steps of the example above are
 
 TODO
 
+
+### Tested Platforms
+
+
++ Mac OS X, clang++ 3.8.1, CUDA version 8.0.28
++ Arch Linux, clang++ 3.9.0, CUDA version 8.0.44
++ Ubuntu Linux, clang++ 3.6.0, CUDA version 7.0.27
+
+ 
 

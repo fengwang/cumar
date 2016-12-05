@@ -20,7 +20,7 @@ int main()
     map()()( "[](double a, double b, double& c){ c = a + b + 1.0; }" )( a_, a_+n, b_, c_ );
 
     device_to_host_copy( c_, c_+n, a.data() );
-    std::cout << "Test Case 1: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << n << " expected.\n";
+    std::cout << "Map Test : " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << n << " expected.\n";
 
     deallocate( a_ );
     deallocate( b_ );

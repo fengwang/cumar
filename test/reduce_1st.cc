@@ -15,7 +15,7 @@ int main()
     double* a_ = host_to_device_clone( a.data(), a.data()+n );
     double red = reduce()()( "[]( double a, double b ){ return a>b?a:b; }" )( a_, a_+n );
 
-    std::cout << "Reduce test 10: " << red << " -- " << n << " expected.\n";
+    std::cout << "Reduce test: " << red << " -- " << n << " expected.\n";
 
     deallocate( a_ );
 
