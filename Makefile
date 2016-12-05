@@ -30,3 +30,11 @@ reduce: test/reduce.cc cumar.o
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/reduce.o test/reduce.cc -Wno-unreachable-code
 	$(LINK) $(LFLAGS) $(LFLAGS) -o $(BIN_DIR)/reduce ${OBJECTS_DIR}/cumar.o $(OBJECTS_DIR)/reduce.o
 
+map_1st: test/map_1st.cc cumar.o
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/map_1st.o test/map_1st.cc -Wunreachable-code
+	$(LINK) $(LFLAGS) $(LFLAGS) -o $(BIN_DIR)/map_1st ${OBJECTS_DIR}/cumar.o $(OBJECTS_DIR)/map_1st.o
+
+reduce_1st: test/reduce_1st.cc cumar.o
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/reduce_1st.o test/reduce_1st.cc -Wunreachable-code
+	$(LINK) $(LFLAGS) $(LFLAGS) -o $(BIN_DIR)/reduce_1st ${OBJECTS_DIR}/cumar.o $(OBJECTS_DIR)/reduce_1st.o
+
