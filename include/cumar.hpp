@@ -15,18 +15,17 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #ifndef DWJUWOBYHOTAGIAAHOTWEGPBLECMWYVTUVGJIDGRUCQRVQEVWSGTVWIICNONGWSPSRIOMJUKQ
 #define DWJUWOBYHOTAGIAAHOTWEGPBLECMWYVTUVGJIDGRUCQRVQEVWSGTVWIICNONGWSPSRIOMJUKQ
 
-#include <string>
-#include <memory>
-#include <array>
-#include <tuple>
-#include <cassert>
-#include <functional>
-#include <sstream>
 #include <algorithm>
-#include <utility>
+#include <array>
+#include <cassert>
+#include <cmath>
+#include <functional>
+#include <memory>
+#include <sstream>
+#include <string>
 #include <tuple>
 #include <type_traits>
-#include <cmath>
+#include <utility>
 
 namespace cumar
 {
