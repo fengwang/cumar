@@ -307,9 +307,7 @@ void make_nvrtc_launcher( char const* const ptx, char const* const func, int gx,
 
 static std::string generate_device_function( std::string const& operation_code_, std::string const& device_function_name_ )
 {
-    //std::string const heading_device_code{ "__device__ void \n" };
     std::string const heading_device_code{ "__device__ __forceinline__  void \n" };
-    //std::string const heading_device_code{ "extern \"C\"\n__device__ __forceinline__  void \n" };
 
     unsigned long const capture_position = operation_code_.find( "(" );
     assert( capture_position != std::string::npos ); // <- must find bracket
@@ -339,7 +337,6 @@ static void decorate_argument( std::string& elem_ )
     unsigned long const pos = elem_.find( " " );
     assert( pos != std::string::npos && "No blank found in argument pair" );
     elem_ = std::string{ elem_.begin(),  elem_.begin()+pos } + std::string{"* __restrict__ "} + std::string{ elem_.begin()+pos, elem_.end() };
-    //elem_ = std::string{ elem_.begin(),  elem_.begin()+pos } + std::string{"* "} + std::string{ elem_.begin()+pos, elem_.end() };
 }
 
 std::tuple<std::string, std::string, std::string> make_map_code( std::string const& operation_code_, unsigned long length_, unsigned long grids_, unsigned long blocks_, unsigned long operations_ )
@@ -359,6 +356,8 @@ std::tuple<std::string, std::string, std::string> make_map_code( std::string con
     std::string const& global_function_name = std::string{"gf_"} + operation_code_hash;
 
     std::string global_code{ "extern \"C\"\n__global__ void "};
+
+    global_code += std::string{" __launch_bounds__ ( "} + std::to_string(blocks_) + std::string{" )\n"};
 
     global_code += global_function_name;
     global_code += std::string{"("};
@@ -481,8 +480,6 @@ static void replace_all( std::string& str_, std::string const& from_, std::strin
 
 std::tuple<std::string, std::string, std::string> make_reduce_code( std::string const& operation_code_, unsigned long length_, unsigned long grids_, unsigned long blocks_, unsigned long operations_ )
 {
-    std::cout << "GENERATING reduce code with [length, grid, blocks, operation] = [" << length_ << ", " << grids_ << ", " << blocks_ << ", " << operations_ << "].\n";
-
     assert( operation_code_.size() && "Empty device function!" );
     assert( length_ && "length of the array is zero!" );
     assert( grids_ && "grid is zero!" );
@@ -528,7 +525,7 @@ std::tuple<std::string, std::string, std::string> make_reduce_code( std::string 
 
     std::string global_code
     {
-        "extern \"C\" __global__ void HOST_FUNCTION(const WORKING_TYPE * __restrict__ input, WORKING_TYPE * __restrict__ output)\n"
+        "extern \"C\" __global__  __launch_bounds__ (BLOCKS) void HOST_FUNCTION(const WORKING_TYPE * __restrict__ input, WORKING_TYPE * __restrict__ output)\n"
         "{\n"
         "    extern __shared__ WORKING_TYPE shared_cache[];\n"
         "\n"

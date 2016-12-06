@@ -110,10 +110,6 @@ namespace cumar
         return [](){};
     }
 
-    inline auto multi_map() // <- map enabling multi-devices
-    {
-    }
-
     inline auto direct_multi_map() // <- map from host memory enabling multi-devices
     {
         return [](){};
@@ -122,10 +118,6 @@ namespace cumar
     inline auto direct_reduce() // <- reduce from host memory
     {
         return [](){};
-    }
-
-    inline auto multi_reduce() // <- reduce enabling multi-device
-    {
     }
 
     inline auto direct_multi_reduce() // <- reduce from host memory enabling multi-devices
