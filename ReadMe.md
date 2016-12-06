@@ -6,39 +6,28 @@ With this library, the super powers of [CUDA](https://www.wikiwand.com/en/CUDA) 
 
 #### __Map__ (designed for __[map](http://www.wikiwand.com/en/Map_(higher-order_function)) n lists__).
 
-A very primitive `c = a + b + 1.0` example.
+A very primitive `c = a + b + 1.0` [example](https://github.com/fengwang/cumar/blob/master/test/map_1st.cc).
 
 ```c++
-#include "../include/cumar.hpp"
-#include <vector>
-#include <numeric>
-#include <iostream>
-#include <algorithm>
+using namespace cumar;
 
-int main()
-{
-    using namespace cumar;
+unsigned long n = 1111111;
 
-    unsigned long n = 1111111;
+std::vector<double> a(n, 1.0);
+std::vector<double> b(n, -1.0);
 
-    std::vector<double> a(n, 1.0);
-    std::vector<double> b(n, -1.0);
+double* a_ = host_to_device( a.data(), a.data()+n );  // returns a device ptr
+double* b_ = host_to_device( b.data(), b.data()+n );  // returns a device ptr
+double* c_ = allocate<double>(n);                           // returns a device ptr
 
-    double* a_ = host_to_device( a.data(), a.data()+n );  // returns a device ptr
-    double* b_ = host_to_device( b.data(), b.data()+n );  // returns a device ptr
-    double* c_ = allocate<double>(n);                           // returns a device ptr
+map()()( "[](double a, double b, double& c){ c = a + b + 1.0; }" )( a_, a_+n, b_, c_ );
 
-    map()()( "[](double a, double b, double& c){ c = a + b + 1.0; }" )( a_, a_+n, b_, c_ );
+device_to_host( c_, c_+n, a.data() );
+std::cout << "Map Test: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << n << " expected.\n";
 
-    device_to_host( c_, c_+n, a.data() );
-    std::cout << "Map Test: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << n << " expected.\n";
-
-    deallocate( a_ );
-    deallocate( b_ );
-    deallocate( c_ );
-
-    return 0;
-}
+deallocate( a_ );
+deallocate( b_ );
+deallocate( c_ );
 ```
 
 The important steps are
@@ -76,32 +65,22 @@ To take care of additional variables attained from context, place their symobls 
 
 #### __Reduce__ (without initial value)
 
-A very simple example to pick up the maximum value from a vector
+A very simple [example](https://github.com/fengwang/cumar/blob/master/test/reduce_1st.cc) demonstrating max reduce
 
 ```C++
-#include "../include/cumar.hpp"
-#include <vector>
-#include <iostream>
-#include <algorithm>
+using namespace cumar;
 
-int main()
-{
-    using namespace cumar;
+unsigned long n = 1111111;
 
-    unsigned long n = 1111111;
+std::vector<double> a(n, 0.0);
+std::generate( a.begin(), a.end(), [](){ double x = 0.0; return [=]() mutable { x += 1.0; return x; }; }() );
 
-    std::vector<double> a(n, 0.0);
-    std::generate( a.begin(), a.end(), [](){ double x = 0.0; return [=]() mutable { x += 1.0; return x; }; }() );
+double* a_ = host_to_device( a.data(), a.data()+n );
+double red = reduce()()( "[]( double a, double b ){ return a>b?a:b; }" )( a_, a_+n );
 
-    double* a_ = host_to_device( a.data(), a.data()+n );
-    double red = reduce()()( "[]( double a, double b ){ return a>b?a:b; }" )( a_, a_+n );
+std::cout << "Reduce test: " << red << " -- " << n << " expected.\n";
 
-    std::cout << "Reduce test: " << red << " -- " << n << " expected.\n";
-
-    deallocate( a_ );
-
-    return 0;
-}
+deallocate( a_ );
 ```
 
 The important steps are
