@@ -210,13 +210,13 @@ namespace cumar
 
     static std::string const make_file_name( std::string const& source )
     {
-		auto id = std::hash<std::string>{}(source);
-		auto const& generator = []( unsigned long id ) -> char { return static_cast<char>(id+'a'); };
-		std::string ans;
-		for ( auto id = std::hash<std::string>{}(source); id != 0; id /= 26 )
-			ans.push_back( generator(id % 26) );
+        auto id = std::hash<std::string>{}(source);
+        auto const& generator = []( unsigned long id ) -> char { return static_cast<char>(id+'a'); };
+        std::string ans;
+        for ( auto id = std::hash<std::string>{}(source); id != 0; id /= 26 )
+            ans.push_back( generator(id % 26) );
 
-		return ans;
+        return ans;
     }
 
     void nvrtc_make_ptx( std::string const& source, std::string& ptx )
@@ -243,18 +243,18 @@ namespace cumar
             }
         }
         {
-			std::cout << "Saving generated cuda file to " << file_name << "\n";
+            std::cout << "Saving generated cuda file to " << file_name << "\n";
             //std::cout << source << "\n\n";
-			std::ofstream ofs( file_name.c_str() );
+            std::ofstream ofs( file_name.c_str() );
 
-			if ( ofs.good() )
-			{
-				ofs << source;
-				std::cout << "Done.\n";
-			}
-			else
-				std::cout << "Failed to save.\n";
-		}
+            if ( ofs.good() )
+            {
+                ofs << source;
+                std::cout << "Done.\n";
+            }
+            else
+                std::cout << "Failed to save.\n";
+        }
 
         nvrtcProgram prog;
         cumar_assert( nvrtcCreateProgram( &prog, source.c_str(), file_name.c_str(), 0, 0, 0 ) );
@@ -267,17 +267,17 @@ namespace cumar
         cumar_assert( nvrtcDestroyProgram( &prog ) );
 
         {
-			std::cout << "Saving compiled ptx file to " << ptx_name << "\n";
-			std::ofstream ofs( ptx_name.c_str() );
+            std::cout << "Saving compiled ptx file to " << ptx_name << "\n";
+            std::ofstream ofs( ptx_name.c_str() );
 
-			if ( ofs.good() )
-			{
-				ofs << ptx;
-				std::cout << "Done.\n";
-			}
-			else
-				std::cout << "Failed to save.\n";
-		}
+            if ( ofs.good() )
+            {
+                ofs << ptx;
+                std::cout << "Done.\n";
+            }
+            else
+                std::cout << "Failed to save.\n";
+        }
     }
 
     void make_nvrtc_launcher( char const* const ptx, char const* const func, int gx, int gy, int gz, int tx, int ty, int tz, void** args, int shared_memory_in_byte )
@@ -367,7 +367,7 @@ namespace cumar
         global_code += std::string{"("};
 
         //take out arguments
-		//TODO: decorate readonly variable with const
+        //TODO: decorate readonly variable with const
         unsigned long const start_pos = operation_code_.find( "(" );
         assert( start_pos != std::string::npos);
         unsigned long const end_pos = operation_code_.find( ")" );
@@ -410,9 +410,9 @@ namespace cumar
                 //global_code += std::string{ "    if ( index + " } + offset_str + std::string{" < "} + std::to_string(length_) + std::string{ " )\n    " };
 
 
-			std::string ptr_offset = std::string{"[index+"} + offset_str + std::string{"]"};
-			if ( current_op == 0 )
-				ptr_offset = std::string{"[index"} + std::string{"]"};
+            std::string ptr_offset = std::string{"[index+"} + offset_str + std::string{"]"};
+            if ( current_op == 0 )
+                ptr_offset = std::string{"[index"} + std::string{"]"};
 
             global_code += std::string{"    "} + device_function_name + std::string{"("};
             for ( auto const& elem : elems )
