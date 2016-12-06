@@ -122,6 +122,52 @@ namespace cumar
         return std::make_tuple( actual_grids, actual_blocks, actual_operations );
     }
 
+    // [grids, blocks, operations]
+    inline std::tuple<unsigned long, unsigned long, unsigned long> make_reduce_configuration( unsigned long const N_ )
+    {
+        assert( N_ > 0 && "Negative array length!" );
+
+        extern int cumar_get_max_thread_x();
+
+        unsigned long const length = N_;
+        unsigned long const max_blocks = cumar_get_max_thread_x();
+
+		if ( max_blocks >= length )
+        {
+            auto const& prev_power2 = []( unsigned long x ) noexcept // isolate the left-most 1-bit in x
+            {
+                x |= x >> 32;
+                x |= x >> 16;
+                x |= x >> 8;
+                x |= x >> 4;
+                x |= x >> 2;
+                x |= x >> 1;
+                x ^= x >> 1;
+                return x;
+            };
+            return std::make_tuple( 1, prev_power2( length ), 2 );
+        }
+
+        //unsigned long const threshold = get_cores_per_processor();
+        unsigned long const threshold = 128;
+        if ( length <= max_blocks * threshold )
+            return std::make_tuple( 1, max_blocks, ( length + max_blocks - 1 ) / max_blocks );
+
+		auto const& approx_sqrt = []( unsigned long x ) noexcept
+		{
+			unsigned long ans = std::max(x >> 1, 1UL);
+			for ( unsigned long i = 0; i != 10; ++i )
+				ans = ( ans + (x+ans-1) / ans ) >> 1;
+			return ans;
+		};
+
+        unsigned long const processors = get_processors();
+        unsigned long const factor = processors * max_blocks;
+        unsigned long const root = approx_sqrt( ( length + factor - 1 ) / factor );
+        unsigned long const gactor = max_blocks * processors * root;
+        return std::make_tuple( processors * root, max_blocks, ( length + gactor - 1 ) / gactor );
+    }
+
     template< typename T >
     inline T* allocate( unsigned long n_ )
     {
@@ -290,6 +336,7 @@ namespace cumar
                         [&generated_demacro]( auto ) noexcept { generated_demacro += std::string{"\n"}; }
                     );
                     composed_degenerator( composed_degenerator, custom_defines_... ); // <- all macros degenerated
+                    /*
                     auto const& prev_power2 = []( unsigned long x ) noexcept // isolate the left-most 1-bit in x
                     {
                         x |= x >> 32;
@@ -308,7 +355,6 @@ namespace cumar
                             ans = ( ans + (x+ans-1) / ans ) >> 1;
                         return ans;
                     };
-                    unsigned long const length = last_ - first_;
                     unsigned long const max_blocks = get_max_thread_x(); // TODO: need consider shared memory size here
                     unsigned long const operation_threshold = get_cores_per_processor();
                     unsigned long processors = get_processors();
@@ -337,6 +383,13 @@ namespace cumar
                         unsigned long const gactor = blocks * grids;
                         operations = ( length + gactor - 1 ) / gactor;
                     }
+                    */
+                    unsigned long const length = last_ - first_;
+                    std::tuple<unsigned long, unsigned long, unsigned long> config = make_reduce_configuration( length );
+                    unsigned long grids = std::get<0>( config );
+                    unsigned long blocks = std::get<1>( config );
+                    unsigned long operations = std::get<2>( config );
+
                     std::tuple<std::string,std::string, std::string> make_reduce_code( std::string const& lambda_code_, unsigned long length_, unsigned long grids_, unsigned long blocks_, unsigned long operations_ );
                     auto const& device_global_kernel =  make_reduce_code( lambda_code_, length, grids, blocks, operations );
                     std::string const& code = predefinition_ + generated_macro + std::get<0>(device_global_kernel) + generated_demacro + std::get<1>(device_global_kernel);
@@ -347,6 +400,25 @@ namespace cumar
                     int shared_memory_in_bytes = blocks * sizeof(result_type);
                     auto&& launcher = make_launcher( ptx, kernel, shared_memory_in_bytes );
                     launcher( grids, 1, 1, blocks, 1, 1 )( first_, device_dst );
+
+                    while ( grids != 1 )
+                    {
+                        config = make_reduce_configuration( grids );
+                        grids = std::get<0>( config );
+                        blocks = std::get<1>( config );
+                        operations = std::get<2>( config );
+
+                        assert( operations >= 2 && "Operations less than 2!" );
+
+                        auto const& device_global_kernel =  make_reduce_code( lambda_code_, length, grids, blocks, operations );
+                        std::string const& code = predefinition_ + generated_macro + std::get<0>(device_global_kernel) + generated_demacro + std::get<1>(device_global_kernel);
+                        std::string const& kernel = std::get<2>(device_global_kernel);
+                        auto&& ptx = make_ptx( code );
+                        int shared_memory_in_bytes = blocks * sizeof(result_type);
+                        auto&& launcher = make_launcher( ptx, kernel, shared_memory_in_bytes );
+                        launcher( grids, 1, 1, blocks, 1, 1 )( device_dst, device_dst );
+                    }
+                    /*
                     if ( grids > 1 ) // second time reduce
                     {
                         unsigned long const new_length = grids;
@@ -371,6 +443,7 @@ namespace cumar
                         auto&& new_launcher = make_launcher( new_ptx, new_kernel, new_shared_memory_in_bytes );
                         new_launcher( new_grids, 1, 1, new_blocks, 1, 1 )( device_dst, device_dst );
                     }
+                    */
                     result_type ans;
                     device_to_host_copy( device_dst, device_dst+1, &ans );
                     deallocate( device_dst );
