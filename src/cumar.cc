@@ -386,7 +386,7 @@ std::tuple<std::string, std::string, std::string> make_map_code( std::string con
     global_code += std::string{"\n{\n"};
 
     std::string const operations = std::to_string( operations_ );
-    std::string const index = std::string{"    unsigned long const const index = (blockDim.x * blockIdx.x + threadIdx.x) * "} + operations + std::string{";\n"};
+    std::string const index = std::string{"    unsigned long const const index = (blockDim.x * blockIdx.x + threadIdx.x);\n"};
     global_code += index;
 
     //  <- "x_0", "x_1", ...
@@ -399,10 +399,10 @@ std::tuple<std::string, std::string, std::string> make_map_code( std::string con
 
     for ( unsigned long current_op = 0; current_op != operations_; ++current_op )
     {
-        std::string const offset_str = std::to_string( current_op );
+        std::string const offset_str = std::to_string( current_op * grids_ * blocks_ );
 
-        if ( branch_pred )
-            global_code += std::string{ "    if ( index" } + std::string{" < "} + std::to_string(length_- current_op) + std::string{ " )\n    " };
+        if ( branch_pred && (current_op == (operations_-1)) )
+            global_code += std::string{ "    if ( index" } + std::string{" < "} + std::to_string(length_- current_op*grids_*blocks_) + std::string{ " )\n    " };
             //global_code += std::string{ "    if ( index + " } + offset_str + std::string{" < "} + std::to_string(length_) + std::string{ " )\n    " };
 
 
