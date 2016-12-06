@@ -1,4 +1,5 @@
 #include "../include/cumar.hpp"
+#include "../include/cumar_misc.hpp"
 #include <string>
 #include <vector>
 #include <numeric>
@@ -21,7 +22,7 @@ int main()
         std::vector<working_type> a;
         a.resize(n);
         std::fill( a.begin(), a.end(), 1 );
-        working_type* a_ = host_to_device_clone( a.data(), a.data()+n );
+        working_type* a_ = host_to_device( a.data(), a.data()+n );
         working_type red;
         {
             timer t{"Testing ..."};
@@ -38,7 +39,7 @@ int main()
         std::vector<working_type> a;
         a.resize(n);
         std::fill( a.begin(), a.end(), 1 );
-        working_type* a_ = host_to_device_clone( a.data(), a.data()+n );
+        working_type* a_ = host_to_device( a.data(), a.data()+n );
         working_type red;
         {
             timer t{"Testing ..."};
@@ -55,7 +56,7 @@ int main()
         std::vector<working_type> a;
         a.resize(n);
         std::fill( a.begin(), a.end(), 1 );
-        working_type* a_ = host_to_device_clone( a.data(), a.data()+n );
+        working_type* a_ = host_to_device( a.data(), a.data()+n );
         working_type red;
         {
             timer t{"Testing ..."};
@@ -72,7 +73,7 @@ int main()
         std::vector<working_type> a;
         a.resize(n);
         std::fill( a.begin(), a.end(), 1 );
-        working_type* a_ = host_to_device_clone( a.data(), a.data()+n );
+        working_type* a_ = host_to_device( a.data(), a.data()+n );
         working_type red;
         {
             timer t{"Testing ..."};
@@ -89,7 +90,7 @@ int main()
         std::vector<working_type> a;
         a.resize(n);
         std::fill( a.begin(), a.end(), 1 );
-        working_type* a_ = host_to_device_clone( a.data(), a.data()+n );
+        working_type* a_ = host_to_device( a.data(), a.data()+n );
         working_type red;
         {
             timer t{"Testing ..."};
@@ -106,7 +107,7 @@ int main()
         std::vector<working_type> a;
         a.resize(n);
         std::fill( a.begin(), a.end(), 1 );
-        working_type* a_ = host_to_device_clone( a.data(), a.data()+n );
+        working_type* a_ = host_to_device( a.data(), a.data()+n );
         working_type red;
         {
             timer t{"Testing ..."};
@@ -123,7 +124,7 @@ int main()
         std::vector<working_type> a;
         a.resize(n);
         std::fill( a.begin(), a.end(), 1 );
-        working_type* a_ = host_to_device_clone( a.data(), a.data()+n );
+        working_type* a_ = host_to_device( a.data(), a.data()+n );
         working_type red;
         {
             timer t{"Testing ..."};
@@ -140,7 +141,7 @@ int main()
         std::vector<working_type> a;
         a.resize(n);
         std::fill( a.begin(), a.end(), 1 );
-        working_type* a_ = host_to_device_clone( a.data(), a.data()+n );
+        working_type* a_ = host_to_device( a.data(), a.data()+n );
         working_type red;
         {
             timer t{"Testing ..."};
@@ -157,7 +158,7 @@ int main()
         std::vector<working_type> a;
         a.resize(n);
         std::fill( a.begin(), a.end(), 1 );
-        working_type* a_ = host_to_device_clone( a.data(), a.data()+n );
+        working_type* a_ = host_to_device( a.data(), a.data()+n );
         working_type red;
         {
             timer t{"Testing max reduce"};
@@ -175,7 +176,7 @@ int main()
         a.resize(n);
         auto const& generator = [](){ double x = 0.0; return [=]() mutable { x += 0.1; return x; }; };
         std::generate( a.begin(), a.end(), generator() );
-        working_type* a_ = host_to_device_clone( a.data(), a.data()+n );
+        working_type* a_ = host_to_device( a.data(), a.data()+n );
         working_type red;
         {
             timer t{"Testing something....."};
@@ -192,7 +193,7 @@ int main()
         std::vector<working_type> a;
         a.resize(n);
         std::fill( a.begin(), a.end(), 0.0 );
-        working_type* a_ = host_to_device_clone( a.data(), a.data()+n );
+        working_type* a_ = host_to_device( a.data(), a.data()+n );
         working_type red;
         {
             timer t{"Testing Opertions."};
