@@ -384,7 +384,7 @@ namespace cumar
                         operations = ( length + gactor - 1 ) / gactor;
                     }
                     */
-                    unsigned long const length = last_ - first_;
+                    unsigned long length = last_ - first_;
                     std::tuple<unsigned long, unsigned long, unsigned long> config = make_reduce_configuration( length );
                     unsigned long grids = std::get<0>( config );
                     unsigned long blocks = std::get<1>( config );
@@ -403,7 +403,8 @@ namespace cumar
 
                     while ( grids != 1 )
                     {
-                        config = make_reduce_configuration( grids );
+                        length = grids;
+                        config = make_reduce_configuration( length );
                         grids = std::get<0>( config );
                         blocks = std::get<1>( config );
                         operations = std::get<2>( config );
