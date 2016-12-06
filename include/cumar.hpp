@@ -104,7 +104,6 @@ namespace cumar
 
 #if 0
     // TODO:
-    //
     inline auto direct_map() // <- map from host memory
     {
         return [](){};
@@ -123,6 +122,18 @@ namespace cumar
     inline auto direct_multi_reduce() // <- reduce from host memory enabling multi-devices
     {
         return [](){};
+    }
+
+    inline auto scan()
+    {
+    }
+
+    inline auto direct_scan()
+    {
+    }
+
+    inline auto direct_multi_scan()
+    {
     }
 #endif
 
