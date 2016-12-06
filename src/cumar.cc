@@ -484,7 +484,7 @@ namespace cumar
 
     std::tuple<std::string, std::string, std::string> make_reduce_code( std::string const& operation_code_, unsigned long length_, unsigned long grids_, unsigned long blocks_, unsigned long operations_ )
     {
-        //std::cout << "GENERATING reduce code with [length, grid, blocks, operation] = [" << length_ << ", " << grids_ << ", " << blocks_ << ", " << operations_ << "].\n";
+        std::cout << "GENERATING reduce code with [length, grid, blocks, operation] = [" << length_ << ", " << grids_ << ", " << blocks_ << ", " << operations_ << "].\n";
 
         assert( operation_code_.size() && "Empty device function!" );
         assert( length_ && "length of the array is zero!" );
