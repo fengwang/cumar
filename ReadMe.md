@@ -24,13 +24,13 @@ int main()
     std::vector<double> a(n, 1.0);
     std::vector<double> b(n, -1.0);
 
-    double* a_ = host_to_device_clone( a.data(), a.data()+n );  // returns a device ptr
-    double* b_ = host_to_device_clone( b.data(), b.data()+n );  // returns a device ptr
+    double* a_ = host_to_device( a.data(), a.data()+n );  // returns a device ptr
+    double* b_ = host_to_device( b.data(), b.data()+n );  // returns a device ptr
     double* c_ = allocate<double>(n);                           // returns a device ptr
 
     map()()( "[](double a, double b, double& c){ c = a + b + 1.0; }" )( a_, a_+n, b_, c_ );
 
-    device_to_host_copy( c_, c_+n, a.data() );
+    device_to_host( c_, c_+n, a.data() );
     std::cout << "Map Test: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << n << " expected.\n";
 
     deallocate( a_ );
@@ -43,7 +43,7 @@ int main()
 
 The important steps are
 
-- copy contents from host vector `a` to device with a simple clone operation `double* a_ = host_to_device_clone(a.data(), a.data()+n);`, returning a device pointer holding device memory;
+- copy contents from host vector `a` to device with a simple clone operation `double* a_ = host_to_device(a.data(), a.data()+n);`, returning a device pointer holding device memory;
 - copy contents of host vector `b` to device;
 - create memory for device pointer `c_`, with a device allocation `double* c_ = allocate<double>(n);`
 - execute `map` operation, each element triplet applies a string lambda `[](double a, double b, double& c){ c = a + b + 1.0; }` . In a plain C++ view, this is equivalent to
@@ -53,7 +53,7 @@ for ( unsigned long i = 0; i != n; ++i )
     [](double a, double b, double& c){ c = a + b + 1.0; }( a[i], b[i], c[i] );
 ```
 
-- copy computation result from device (pinter `c_`) to host (vector `a`) with `device_to_host_copy( c_, c_+n, a.data() );`
+- copy computation result from device (pinter `c_`) to host (vector `a`) with `device_to_host( c_, c_+n, a.data() );`
 
 
 The `map` funcion works with arbitrary positive numbers of arguments
@@ -93,7 +93,7 @@ int main()
     std::vector<double> a(n, 0.0);
     std::generate( a.begin(), a.end(), [](){ double x = 0.0; return [=]() mutable { x += 1.0; return x; }; }() );
 
-    double* a_ = host_to_device_clone( a.data(), a.data()+n );
+    double* a_ = host_to_device( a.data(), a.data()+n );
     double red = reduce()()( "[]( double a, double b ){ return a>b?a:b; }" )( a_, a_+n );
 
     std::cout << "Reduce test: " << red << " -- " << n << " expected.\n";
