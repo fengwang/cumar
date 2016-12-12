@@ -45,11 +45,11 @@ for ( unsigned long i = 0; i != n; ++i )
 - copy computation result from device (pinter `c_`) to host (vector `a`) with `device_to_host( c_, c_+n, a.data() );`
 
 
-The `map` funcion works with arbitrary positive numbers of arguments
+The `map` funcion works with at least 2 arguments
 
 + for `a = b + c + d + e + f + g + h`, the `map` step will look like
 
-		map()()( "[](double& a, double b, double c, double d, double e, double f, double g  double h ){ a = b + c + d + e + f + g + h; " )( a, b, c, d, e, f, g );
+		map()()( "[](double& a, double b, double c, double d, double e, double f, double g  double h ){ a = b + c + d + e + f + g + h; " )( a, a+n, b, c, d, e, f, g );
 
 To take care of additional variables attained from context, place their symobls and values in the second bracket
 

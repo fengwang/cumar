@@ -363,7 +363,6 @@ std::tuple<std::string, std::string, std::string> make_map_code( std::string con
     global_code += std::string{"("};
 
     //take out arguments
-    //TODO: decorate readonly variable with const
     unsigned long const start_pos = operation_code_.find( "(" );
     assert( start_pos != std::string::npos);
     unsigned long const end_pos = operation_code_.find( ")" );
