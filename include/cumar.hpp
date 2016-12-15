@@ -29,8 +29,11 @@ namespace cumar
         {
             return [=]( std::string const& lambda_code_ ) noexcept
             {
-                return [=]( auto&& first_, auto&& last_, auto&& ... rests_ ) noexcept // <- all iterators
+                return [=]( auto first_, auto last_, auto ... rests_ ) noexcept // <- all iterators
                 {
+                    static_assert( std::is_same_v< decltype(first_), decltype(last_) >, "first two argument type not match!" );
+                    static_assert( cumar_private::all_pointer<decltype(first_), decltype(last_), decltype(rests_)...>::value, "arguments contains non-pointer entry!" );
+
                     auto const& macros = cumar_private::make_macro()( custom_defines_... );
                     std::string const generated_macro = std::get<0>( macros );
                     std::string const generated_demacro = std::get<1>( macros );
@@ -46,7 +49,7 @@ namespace cumar
                     std::string const& kernel = std::get<2>(device_global_kernel);
                     auto&& ptx = cumar_private::make_ptx( code );
                     auto&& launcher = cumar_private::make_launcher( ptx, kernel );
-                    launcher( grids, 1, 1, blocks, 1, 1 )( std::forward<decltype(first_)>(first_), std::forward<decltype(rests_)>(rests_)... );
+                    launcher( grids, 1, 1, blocks, 1, 1 )( first_, rests_... );
                     return ptx;
                 }; // first_, last_, rests_...
             };// lambda_code_
@@ -59,8 +62,11 @@ namespace cumar
         {
             return [=]( std::string const& lambda_code_ ) noexcept
             {
-                return [=]( auto&& first_, auto&& last_ ) noexcept // <- all iterators
+                return [=]( auto first_, auto last_ ) noexcept // <- all iterators
                 {
+                    static_assert( std::is_same_v< decltype(first_), decltype(last_) >, "first two argument type not match!" );
+                    static_assert( cumar_private::all_pointer< decltype(first_), decltype(last_) >::value, "arguments contains non-pointer entry!" );
+
                     auto const& macros = cumar_private::make_macro()( custom_defines_... );
                     std::string const generated_macro = std::get<0>( macros );
                     std::string const generated_demacro = std::get<1>( macros );
