@@ -29,7 +29,6 @@ namespace cumar
 
         template< bool... > struct bool_pack;
         template< bool... bs > using all_true = std::is_same< bool_pack<bs..., true>, bool_pack<true, bs...>>;
-        template< typename ... Args > struct arg_pack;
         template< typename ... Args > using all_pointer = all_true< std::is_pointer_v<Args>... >;
 
         template <typename Arg, typename... Args>
