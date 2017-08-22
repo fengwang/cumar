@@ -221,6 +221,7 @@ void nvrtc_make_ptx( std::string const& source, std::string& ptx )
     std::string option_1{ "--gpu-architecture=compute_XX" };
     *(option_1.rbegin()) = '0' + cumar_get_minor_capability();
     *(option_1.rbegin()+1) = '0' + cumar_get_major_capability();
+    //std::string option_1{ "--gpu-architecture=compute_30" };
     std::string option_2{ "--use_fast_math" };
     std::string option_3{ "--std=c++11" };
     std::string option_4{ "--debug" };
