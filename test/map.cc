@@ -14,7 +14,7 @@ int main()
 
 	typedef float working_type;
 
-	unsigned long n = 11111111;
+	unsigned long n = 1111111;
 	//unsigned long n = 1111111;
 
     std::vector<working_type> a;
@@ -42,6 +42,15 @@ int main()
     }
 
     {
+        {
+            timer( "Map 1.5" );
+            map()()( "[](float a, float b, float& c){ c = a + b + 1.0; } " )( a_, a_+n, b_, c_ );
+        }
+        device_to_host( c_, c_+n, a.data() );
+        std::cout << "Test Case 1.5: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << n << " expected.\n";
+    }
+
+    {
         float x = 1.1;
         {
             timer( "Map 2" );
@@ -53,13 +62,34 @@ int main()
 
     {
         float x = 1.1;
+        {
+            timer( "Map 2.5" );
+            map()( "x", x )( "[](float a, float b, float& c){ c = a + b + 1.0 - x; } " )( a_, a_+n, b_, c_ );
+        }
+        device_to_host( c_, c_+n, a.data() );
+        std::cout << "Test Case 2.5: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << -0.1 *  n  << " expected.\n";
+    }
+
+    {
+        float x = 1.1;
         float yy = 1.2;
         {
             timer( "Map 3" );
             map()( "x", x, "yy", yy )( "[](float a, float b, float& c){ c = a + b + 1.0 - x + sin(yy); } " )( a_, a_+n, b_, c_ );
         }
         device_to_host( c_, c_+n, a.data() );
-        std::cout << "Test Case 2: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << (-0.1+std::sin(yy)) *  n  << " expected.\n";
+        std::cout << "Test Case 3: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << (-0.1+std::sin(yy)) *  n  << " expected.\n";
+    }
+
+    {
+        float x = 1.1;
+        float yy = 1.2;
+        {
+            timer( "Map 3.5" );
+            map()( "x", x, "yy", yy )( "[](float a, float b, float& c){ c = a + b + 1.0 - x + sin(yy); } " )( a_, a_+n, b_, c_ );
+        }
+        device_to_host( c_, c_+n, a.data() );
+        std::cout << "Test Case 3.5: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << (-0.1+std::sin(yy)) *  n  << " expected.\n";
     }
     {
         float index = 0;

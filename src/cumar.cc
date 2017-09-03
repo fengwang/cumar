@@ -4,6 +4,7 @@
 #include <nvrtc.h>
 #include <cuda_runtime.h>
 
+#include <map>
 #include <cassert>
 #include <functional>
 #include <fstream>
@@ -229,6 +230,15 @@ void nvrtc_make_ptx( std::string const& source, std::string& ptx )
     std::string const& file_name = std::string{"./ptx/"} + make_file_name( source+option_1 ) + std::string{".cu"};
     std::string const& ptx_name = file_name + std::string{".ptx"};
 
+    static std::map< std::string, std::string > ptx_cache; // <- look up from cache
+    if ( auto it = ptx_cache.find( ptx_name ); it != ptx_cache.end() )
+    {
+        //std::cout << "Loading Generated ptx Code\n";
+        ptx = (*it).second;
+        return;
+    }
+
+#ifdef DEBUG
     // Typical compilation time is around 1
     {//check if this file has been compiled
         std::ifstream ifs( ptx_name.c_str() );
@@ -253,6 +263,7 @@ void nvrtc_make_ptx( std::string const& source, std::string& ptx )
         else
             std::cout << "Failed to save.\n";
     }
+#endif
 
     nvrtcProgram prog;
     cumar_assert( nvrtcCreateProgram( &prog, source.c_str(), file_name.c_str(), 0, 0, 0 ) );
@@ -263,7 +274,9 @@ void nvrtc_make_ptx( std::string const& source, std::string& ptx )
     ptx.resize( sz );
     cumar_assert( nvrtcGetPTX( prog, &ptx[0] ) );
     cumar_assert( nvrtcDestroyProgram( &prog ) );
+    ptx_cache[ptx_name] = ptx; // saving to cache
 
+#ifdef DEBUG
     {
         std::cout << "Saving compiled ptx file to " << ptx_name << "\n";
         std::ofstream ofs( ptx_name.c_str() );
@@ -276,6 +289,7 @@ void nvrtc_make_ptx( std::string const& source, std::string& ptx )
         else
             std::cout << "Failed to save.\n";
     }
+#endif
 }
 
 void make_nvrtc_launcher( char const* const ptx, char const* const func, int gx, int gy, int gz, int tx, int ty, int tz, void** args, int shared_memory_in_byte )
