@@ -1,3 +1,8 @@
+#include "./warnings.hpp"
+
+SUPPRESS_WARNINGS
+
+
 #include "../include/cumar_misc.hpp"
 
 #include <cuda.h>
@@ -660,4 +665,7 @@ namespace cumar
 }
 
 #undef cumar_assert
+
+
+RESTORE_WARNINGS
 
