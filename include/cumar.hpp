@@ -18,6 +18,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include "cumar_private.hpp"
 
+//TODO: move to file cumar_private.hpp
 std::tuple<std::string,std::string, std::string> make_map_code( std::string const& lambda_code_, unsigned long length_, unsigned long grids_, unsigned long blocks_, unsigned long operations_ );
 std::tuple<std::string,std::string, std::string> make_reduce_code( std::string const& lambda_code_, unsigned long length_, unsigned long grids_, unsigned long blocks_, unsigned long operations_ );
 
@@ -35,21 +36,14 @@ namespace cumar
                     static_assert( std::is_same_v< decltype(first_), decltype(last_) >, "first two argument type not match!" );
                     static_assert( cumar_private::all_pointer<decltype(first_), decltype(last_), decltype(rests_)...>::value, "arguments contains non-pointer entry!" );
 
-                    auto const& macros = cumar_private::make_macro()( custom_defines_... );
-                    std::string const generated_macro = std::get<0>( macros );
-                    std::string const generated_demacro = std::get<1>( macros );
+                    auto const& [generated_macro, generated_demacro] = cumar_private::make_macro()( custom_defines_... );
 
                     unsigned long length = last_ - first_;
-                    auto const& config = cumar_private::make_map_configuration( length );
-                    int const grids = std::get<0>( config );
-                    int const blocks = std::get<1>( config );
-                    int const operations = std::get<2>( config );
+                    auto const [grids, blocks, operations] = cumar_private::make_map_configuration( length );
 
-                    auto const& device_global_kernel =  make_map_code( lambda_code_, length, grids, blocks, operations );
-                    std::string const& code = predefinition_ + generated_macro + std::get<0>(device_global_kernel) + generated_demacro + std::get<1>(device_global_kernel);
-                    std::string const& kernel = std::get<2>(device_global_kernel);
-                    auto&& ptx = cumar_private::make_ptx( code );
-                    auto&& launcher = cumar_private::make_launcher( ptx, kernel );
+                    auto const& [device_code, global_code, kernel_name ] = make_map_code( lambda_code_, length, grids, blocks, operations );
+                    auto const& ptx = cumar_private::make_ptx( predefinition_ + generated_macro + device_code + generated_demacro + global_code );
+                    auto&& launcher = cumar_private::make_launcher( ptx, kernel_name );
                     launcher( grids, 1, 1, blocks, 1, 1 )( first_, rests_... );
                     return ptx;
                 }; // first_, last_, rests_...
@@ -68,9 +62,7 @@ namespace cumar
                     static_assert( std::is_same_v< decltype(first_), decltype(last_) >, "first two argument type not match!" );
                     static_assert( cumar_private::all_pointer< decltype(first_), decltype(last_) >::value, "arguments contains non-pointer entry!" );
 
-                    auto const& macros = cumar_private::make_macro()( custom_defines_... );
-                    std::string const generated_macro = std::get<0>( macros );
-                    std::string const generated_demacro = std::get<1>( macros );
+                    auto const& [generated_macro, generated_demacro] = cumar_private::make_macro()( custom_defines_... );
 
                     unsigned long length = last_ - first_;
                     std::tuple<unsigned long, unsigned long, unsigned long> config = cumar_private::make_reduce_configuration( length );
@@ -81,16 +73,12 @@ namespace cumar
 
                     for (;;)
                     {
-                        unsigned long grids = std::get<0>( config );
-                        unsigned long blocks = std::get<1>( config );
-                        unsigned long operations = std::get<2>( config );
+                        auto const& [grids, blocks, operations] = config;
 
-                        auto const& device_global_kernel =  make_reduce_code( lambda_code_, length, grids, blocks, operations );
-                        std::string const& code = predefinition_ + generated_macro + std::get<0>(device_global_kernel) + generated_demacro + std::get<1>(device_global_kernel);
-                        std::string const& kernel = std::get<2>(device_global_kernel);
-                        auto&& ptx = cumar_private::make_ptx( code );
+                        auto const& [device_code, global_code, kernel_name ] = make_reduce_code( lambda_code_, length, grids, blocks, operations );
+                        auto&& ptx = cumar_private::make_ptx( predefinition_ + generated_macro + device_code + generated_demacro + global_code );
                         int shared_memory_in_bytes = blocks * sizeof(result_type);
-                        auto&& launcher = cumar_private::make_launcher( ptx, kernel, shared_memory_in_bytes );
+                        auto&& launcher = cumar_private::make_launcher( ptx, kernel_name, shared_memory_in_bytes );
                         launcher( grids, 1, 1, blocks, 1, 1 )( device_in, device_out );
 
                         if ( grids == 1 ) break;
@@ -109,40 +97,6 @@ namespace cumar
         };// custom_defines_...
     }// predefinition_
 
-#if 0
-    // TODO:
-    inline auto direct_map() // <- map from host memory
-    {
-        return [](){};
-    }
-
-    inline auto direct_multi_map() // <- map from host memory enabling multi-devices
-    {
-        return [](){};
-    }
-
-    inline auto direct_reduce() // <- reduce from host memory
-    {
-        return [](){};
-    }
-
-    inline auto direct_multi_reduce() // <- reduce from host memory enabling multi-devices
-    {
-        return [](){};
-    }
-
-    inline auto scan()
-    {
-    }
-
-    inline auto direct_scan()
-    {
-    }
-
-    inline auto direct_multi_scan()
-    {
-    }
-#endif
 
 }//namespace cumar
 

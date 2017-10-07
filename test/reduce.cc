@@ -135,17 +135,17 @@ int main()
         deallocate( a_ );
     }
 
-    if ( 0 ) // memory not fit with GF750M
+    if ( 1 ) // memory not fit with GF750M, try float
     {
         unsigned long n = 11111111;
-        std::vector<working_type> a;
+        std::vector<float> a;
         a.resize(n);
-        std::fill( a.begin(), a.end(), 1 );
-        working_type* a_ = host_to_device( a.data(), a.data()+n );
-        working_type red;
+        std::fill( a.begin(), a.end(), 1.0f );
+        float* a_ = host_to_device( a.data(), a.data()+n );
+        float red;
         {
             timer t{"Testing ..."};
-            red = reduce()()( "[]( double a, double b ){ return a+b; }" )( a_, a_+n );
+            red = reduce()()( "[]( float a, float b ){ return a+b; }" )( a_, a_+n );
         }
         std::cout.precision( 15 );
         std::cout << "Reduce test 8: " << red << " -- " << n << " expected.\n";
