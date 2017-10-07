@@ -9,25 +9,27 @@ With this library, the super powers of [CUDA](https://www.wikiwand.com/en/CUDA) 
 A very primitive `c = a + b + 1.0` [example](https://github.com/fengwang/cumar/blob/master/test/map_1st.cc).
 
 ```c++
-using namespace cumar;
+int main()
+{
+    using namespace cumar;
+    unsigned long n = 1111111;
 
-unsigned long n = 1111111;
+    std::vector<double> a(n, 1.0);
+    std::vector<double> b(n, -1.0);
 
-std::vector<double> a(n, 1.0);
-std::vector<double> b(n, -1.0);
+    double* a_ = host_to_device( a.data(), a.data()+n );  // returns a device ptr
+    double* b_ = host_to_device( b.data(), b.data()+n );  // returns a device ptr
+    double* c_ = allocate<double>(n);                     // returns a device ptr
 
-double* a_ = host_to_device( a.data(), a.data()+n );  // returns a device ptr
-double* b_ = host_to_device( b.data(), b.data()+n );  // returns a device ptr
-double* c_ = allocate<double>(n);                           // returns a device ptr
+    map()()( "[](double a, double b, double& c){ c = a + b + 1.0; }" )( a_, a_+n, b_, c_ );
 
-map()()( "[](double a, double b, double& c){ c = a + b + 1.0; }" )( a_, a_+n, b_, c_ );
+    device_to_host( c_, c_+n, a.data() );
+    std::cout << "Map Test: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << n << " expected.\n";
 
-device_to_host( c_, c_+n, a.data() );
-std::cout << "Map Test: " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << n << " expected.\n";
-
-deallocate( a_ );
-deallocate( b_ );
-deallocate( c_ );
+    deallocate( a_ );
+    deallocate( b_ );
+    deallocate( c_ );
+}
 ```
 
 The important steps are
@@ -49,17 +51,17 @@ The `map` funcion works with at least 2 arguments
 
 + for `a = b + c + d + e + f + g + h`, the `map` step will look like
 
-		map()()( "[](double& a, double b, double c, double d, double e, double f, double g  double h ){ a = b + c + d + e + f + g + h; " )( a, a+n, b, c, d, e, f, g );
+        map()()( "[](double& a, double b, double c, double d, double e, double f, double g  double h ){ a = b + c + d + e + f + g + h; " )( a, a+n, b, c, d, e, f, g );
 
 To take care of additional variables attained from context, place their symobls and values in the second bracket
 
 + for `a = b * x + c * y + z`, where `x`, `y` and `z` are constant variables, the corresponding code example takes a form of
 
 ```C++
-	double x = 1.0;
-	double y = 2.0;
-	double z = 3.0;
-	map()("x", x, "y", y, "z", z)( "[](double& a, double b, double c){ a = b*x + c*y + z; }" )( a, b, c );
+    double x = 1.0;
+    double y = 2.0;
+    double z = 3.0;
+    map()("x", x, "y", y, "z", z)( "[](double& a, double b, double c){ a = b*x + c*y + z; }" )( a, b, c );
 ```
 
 
@@ -89,7 +91,7 @@ The important steps are
 - copy contents of this vector to device memory, returns a device pointer;
 - execute fold operation `max` from a string lambda, `"[]( double a, double b ){ return a>b?a:b; }"`, which is equivalent to
 
-		double red = max( a[0], max( a[1], max( a[2], ... ) ) );
+        double red = max( a[0], max( a[1], max( a[2], ... ) ) );
 
 ### Implementation Details
 
@@ -99,9 +101,7 @@ TODO
 ### Tested Platforms
 
 
-+ Mac OS X, clang++ 3.8.1, CUDA version 8.0.28
-+ Arch Linux, clang++ 3.9.0, CUDA version 8.0.44
-+ Ubuntu Linux, clang++ 3.6.0, CUDA version 7.0.27
++ Mac OS X, clang++ 5.0.0; CUDA version 9.0.197
 
 
 
