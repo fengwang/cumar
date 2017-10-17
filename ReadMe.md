@@ -185,7 +185,7 @@ unsigned long const n = 1111111;
 double* A = ...;
 double red = cumar::reduce()()( "[]( double a, double b ){ return a>b?a:b; }" )( A, A+n );
 ```
-with a chipset model of `NVIDIA GeForce GT 750M`, it will, for the first run with a dimension setup of Grids (46, 1, 1) and Blocks ( 1024, 1, 1 ), generate code 
+with a chipset model of `NVIDIA GeForce GT 750M`, it will, for the first run with shared memory 8192 bytes,  a dimension setup of Grids (46, 1, 1) and Blocks ( 1024, 1, 1 ), generate code 
 
 ```
 __device__ __forceinline__ double dr_xhvpqsohikrkyd( double a, double b ){ return a>b?a:b; }
@@ -297,7 +297,7 @@ extern "C" __global__  __launch_bounds__ (1024) void gr_xhvpqsohikrkyd(const dou
 }
 ```
 
-and for the second run with a dimension setup of Grids (1, 1, 1) and Blocks (32, 1 1), generates code
+and for the second run with shared memory 256 bytes, a dimension setup of Grids (1, 1, 1) and Blocks (32, 1 1), generates code
 
 ```
 __device__ __forceinline__ double dr_xhvpqsohikrkyd( double a, double b ){ return a>b?a:b; }
