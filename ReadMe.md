@@ -387,16 +387,16 @@ extern "C" __global__  __launch_bounds__ (32) void gr_xhvpqsohikrkyd(const doubl
 }
 ```
 
-It is also possible to pass argument(s) when calling `cumar::reduce()`, similiar as `cumar::map()`, just put them in the second brackets. Below is an example summing up all the elements in the array with and extra element `alpha`
+It is also possible to pass argument(s) when calling `cumar::reduce()`. Similiar as `cumar::map()`, just put them in the second brackets. Here is an example summing up all the elements in the array with an extra random element `alpha`
 
 ```
-double alpha = rand()
+double alpha = rand();
 cumar::map()("alpha", alpha)( "[](double a, double b){return a+b+lambda;}" )( A, A+n );
 ``` 
 
 ### More examples
 
-Please the test files located under folder `./test`
+Please refere to the files located under folder `./test`.
 
 
 
