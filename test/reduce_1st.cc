@@ -8,7 +8,7 @@ int main()
 {
     using namespace cumar;
 
-    unsigned long n = 111;
+    unsigned long n = 1111111;
 
     std::vector<double> a(n, 0.0);
     std::generate( a.begin(), a.end(), [](){ double x = 0.0; return [=]() mutable { x += 1.0; return x; }; }() );
