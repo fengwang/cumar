@@ -15,8 +15,7 @@ all: map reduce
 
 clean:
 	rm -rf $(OBJECTS_DIR)/*.o
-	rm -rf ./ptx/*.cu
-	rm -rf ./ptx/*.ptx
+	rm -rf $(BIN_DIR)/*
 
 cumar.o: src/cumar.cc
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o $(OBJECTS_DIR)/cumar.o src/cumar.cc

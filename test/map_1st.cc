@@ -18,7 +18,7 @@ int main()
     double* b_ = host_to_device( b.data(), b.data()+n );  // device ptr
     double* c_ = allocate<double>(n);                           // device ptr
 
-    map()()( "[](double a, double b, double& c){ c = a + a*b + b; }" )( a_, a_+n, b_, c_ );
+    map()()( "[](double a, double b, double& c){ c = a + a*b - b; }" )( a_, a_+n, b_, c_ );
 
     device_to_host( c_, c_+n, a.data() );
     std::cout << "Map Test : " << std::accumulate( a.begin(), a.end(), 0.0 ) << " -- " << n << " expected.\n";
