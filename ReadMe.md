@@ -1,4 +1,4 @@
-CUMAR (__CU__da __MA__p__R__educe) is a C++ library accelerating [MapReduce](https://www.wikiwand.com/en/MapReduce) development on GPU. 
+CUMAR (__CU__da __MA__p__R__educe) is a C++ library accelerating [MapReduce](https://www.wikiwand.com/en/MapReduce) development on GPU.
 
 With this library, the super powers of [Nvidia GPU](https://www.wikiwand.com/en/CUDA) are utilized without coding in CUDA.
 
@@ -7,174 +7,73 @@ With this library, the super powers of [Nvidia GPU](https://www.wikiwand.com/en/
 ### exmaple for a single array [map](http://www.wikiwand.com/en/Map_(higher-order_function))
 
 
-To implement 
-> A = 1.0
-
-where A is an array of size 10024, we can code it concisely 
-
-```c++
-//map_example.cc
-unsigned long n = 10024;
-float * A = ...;//allocated on device
-cumar::map()()("[](float &a){ a = 1.0; }")(A, A+n);
-```
-
-in which the lambda object passed the desired GPU operation in a string form
+Let there be two vectors, A and B. To calculate their elementwise product C with a specified operation
 
 ```
-[](float &a){ a = 1.0; }
-``` 
-
-
-Then run a typical compilation and link command (Mac OS X for example)
+C[i] = A[i] - B[i] + A[i] * B[i]
 
 ```
-clang++ -c -std=c++17 -stdlib=libc++ -O2 -I/Developer/NVIDIA/CUDA-8.0/include -o ./cumar.o src/cumar.cc ./map_example.cc
 
-clang++ -lc++ -lc++abi -O3 -lcudart -lnvrtc -L/Developer/NVIDIA/CUDA-8.0/lib -framework CUDA -o ./map_example ./cumar.o
+We need to write some typical trivial host code like this:
+
+```C++
+//main.cc
+void impl_operation( float* A, float* B, float* C, int N );
+
+float* A = ...;
+float* B = ...;
+float* C = ...;
+int N = ...;
+
+impl_operation( A, B, C, N );
 ```
 
-`./map_example` will carefully generate optimized CUDA code and configuration in memory matching the technical specifications of current working GPU, then execute it. The generated code will be cached in case of reuse.
+with device side CUDA code:
 
-For instance, with a chipset model of `NVIDIA GeForce GT 750M`, it will generate CUDA code below
-
-```
-__device__ __forceinline__  void
-df_ktdaezcfwmoxyc(float& a){  a = 1.0f; }
-
-
-extern "C"
-__global__ void  __launch_bounds__ ( 192 )
-gf_ktdaezcfwmoxyc(float* __restrict__   a)
+```CUDA
+// impl_operation.cu
+__global__ __impl_operation( float* A, float* B, float* C, int N )
 {
-    unsigned long const const index = (blockDim.x * blockIdx.x + threadIdx.x);
-    df_ktdaezcfwmoxyc( a[index]) ;
-    df_ktdaezcfwmoxyc( a[index+384]) ;
-    df_ktdaezcfwmoxyc( a[index+768]) ;
-    df_ktdaezcfwmoxyc( a[index+1152]) ;
-    df_ktdaezcfwmoxyc( a[index+1536]) ;
-    df_ktdaezcfwmoxyc( a[index+1920]) ;
-    df_ktdaezcfwmoxyc( a[index+2304]) ;
-    df_ktdaezcfwmoxyc( a[index+2688]) ;
-    df_ktdaezcfwmoxyc( a[index+3072]) ;
-    df_ktdaezcfwmoxyc( a[index+3456]) ;
-    df_ktdaezcfwmoxyc( a[index+3840]) ;
-    df_ktdaezcfwmoxyc( a[index+4224]) ;
-    df_ktdaezcfwmoxyc( a[index+4608]) ;
-    df_ktdaezcfwmoxyc( a[index+4992]) ;
-    df_ktdaezcfwmoxyc( a[index+5376]) ;
-    df_ktdaezcfwmoxyc( a[index+5760]) ;
-    df_ktdaezcfwmoxyc( a[index+6144]) ;
-    df_ktdaezcfwmoxyc( a[index+6528]) ;
-    df_ktdaezcfwmoxyc( a[index+6912]) ;
-    df_ktdaezcfwmoxyc( a[index+7296]) ;
-    df_ktdaezcfwmoxyc( a[index+7680]) ;
-    df_ktdaezcfwmoxyc( a[index+8064]) ;
-    df_ktdaezcfwmoxyc( a[index+8448]) ;
-    df_ktdaezcfwmoxyc( a[index+8832]) ;
-    df_ktdaezcfwmoxyc( a[index+9216]) ;
-    df_ktdaezcfwmoxyc( a[index+9600]) ;
-    if ( index < 40 )
-        df_ktdaezcfwmoxyc( a[index+9984]) ;
+    int const index = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if ( index < N )
+        C[index] = A[index] - B[index] + A[index] * B[index];
+
+}
+
+void impl_operation( float* A, float* B, float* C, int N )
+{
+    int blocks = 128;
+    int grids = (N + blocks - 1) / blocks;
+
+    __impl_operation<<<grids, blocks>>>( A, B, C, N );
 }
 ```
 
-and corresponding ptx code
+With the help cumar library, we can implement this operation in pure C++ within a few lines:
 
-```
-.version 5.0
-.target sm_30
-.address_size 64
-.visible .entry gf_ktdaezcfwmoxyc(
-	.param .u64 gf_ktdaezcfwmoxyc_param_0
-)
-.maxntid 192, 1, 1
-{
-	.reg .pred 	%p<2>;
-	.reg .b32 	%r<7>;
-	.reg .b64 	%rd<5>;
-
-
-	ld.param.u64 	%rd2, [gf_ktdaezcfwmoxyc_param_0];
-	cvta.to.global.u64 	%rd3, %rd2;
-	mov.u32 	%r1, %ctaid.x;
-	mov.u32 	%r2, %ntid.x;
-	mov.u32 	%r3, %tid.x;
-	mad.lo.s32 	%r4, %r1, %r2, %r3;
-	mul.wide.u32 	%rd4, %r4, 4;
-	add.s64 	%rd1, %rd3, %rd4;
-	mov.u32 	%r5, 1065353216;
-	st.global.u32 	[%rd1], %r5;
-	st.global.u32 	[%rd1+1536], %r5;
-	st.global.u32 	[%rd1+3072], %r5;
-	st.global.u32 	[%rd1+4608], %r5;
-	st.global.u32 	[%rd1+6144], %r5;
-	st.global.u32 	[%rd1+7680], %r5;
-	st.global.u32 	[%rd1+9216], %r5;
-	st.global.u32 	[%rd1+10752], %r5;
-	st.global.u32 	[%rd1+12288], %r5;
-	st.global.u32 	[%rd1+13824], %r5;
-	st.global.u32 	[%rd1+15360], %r5;
-	st.global.u32 	[%rd1+16896], %r5;
-	st.global.u32 	[%rd1+18432], %r5;
-	st.global.u32 	[%rd1+19968], %r5;
-	st.global.u32 	[%rd1+21504], %r5;
-	st.global.u32 	[%rd1+23040], %r5;
-	st.global.u32 	[%rd1+24576], %r5;
-	st.global.u32 	[%rd1+26112], %r5;
-	st.global.u32 	[%rd1+27648], %r5;
-	st.global.u32 	[%rd1+29184], %r5;
-	st.global.u32 	[%rd1+30720], %r5;
-	st.global.u32 	[%rd1+32256], %r5;
-	st.global.u32 	[%rd1+33792], %r5;
-	st.global.u32 	[%rd1+35328], %r5;
-	st.global.u32 	[%rd1+36864], %r5;
-	st.global.u32 	[%rd1+38400], %r5;
-	setp.gt.u32	%p1, %r4, 39;
-	@%p1 bra 	BB0_2;
-
-	st.global.u32 	[%rd1+39936], %r5;
-
-BB0_2:
-	ret;
-}
-```
-and run the code with dimension setup of Grids ( 2, 1, 1 ) and Blocks ( 192, 1, 1 ).
-
-
-
-### exmaple for argument(s) passing mapping
-
-To implement 
-> A = x+y;
-
-where A is an array of size 10024 and x and y are two runtime arguments, we can hijack `x` and `y` as two MACROs, and feed them to the map function
-
-```c++
-unsigned long n = 10024;
-float x = rand();
-float y = rand();
-float * A = ...;
-cumar::map()("x", x, "y", y)("[](float &a){ a = x+y; }")(A, A+n);
+```C++
+float* A = ...;
+float* B = ...;
+float* C = ...;
+int N = ...;
+cumar::map()("[](double a, double b, double& c){ c = a - b + a*b; }")( A, A+N, B, C );
 ```
 
-### example for arbitary number array mapping
+Depending the working GPU, cumar library will automately generate optimized CUDA code and ptx code, then launch it.
+For a typical GTX 1080 GPU, the generated files ard dumped under the `ptx` folder
 
-To implement
++ [fxaudahpqbfwqg.cu](ptx/fxaudahpqbfwqg.cu)
++ [fxaudahpqbfwqg.cu.ptx](ptx/fxaudahpqbfwqg.cu.ptx)
 
-> A = B + C - D + E + 1.0;
 
-where A, B, C, D and E are array of size 10024, we can code it this way
 
-```
-cumar::map()()("[](float& a, float b, float c, float d, fload e){ a = b + c - d + e + 1.0f; } ")(A, A+n, B, C, D, E);
-```
 
 
 
 ### __Reduce__ (without initial value)
 
-To reduce the maximum value of an array 
+To reduce the maximum value of an array
 
 > mx = MAX(A)
 
@@ -185,7 +84,7 @@ unsigned long const n = 1111111;
 double* A = ...;
 double red = cumar::reduce()()( "[]( double a, double b ){ return a>b?a:b; }" )( A, A+n );
 ```
-with a chipset model of `NVIDIA GeForce GT 750M`, it will, for the first run with shared memory 8192 bytes,  a dimension setup of Grids (46, 1, 1) and Blocks ( 1024, 1, 1 ), generate code 
+with a chipset model of `NVIDIA GeForce GT 750M`, it will, for the first run with shared memory 8192 bytes,  a dimension setup of Grids (46, 1, 1) and Blocks ( 1024, 1, 1 ), generate code
 
 ```
 __device__ __forceinline__ double dr_xhvpqsohikrkyd( double a, double b ){ return a>b?a:b; }
@@ -392,7 +291,7 @@ It is also possible to pass argument(s) when calling `cumar::reduce()`. Similiar
 ```
 double alpha = rand();
 cumar::map()("alpha", alpha)( "[](double a, double b){return a+b+lambda;}" )( A, A+n );
-``` 
+```
 
 ### More examples
 
