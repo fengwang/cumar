@@ -55,7 +55,7 @@ cumar::map()("[](double a, double b, double& c){ c = a - b + a*b; }")( A, A+N, B
 ```
 
 Depending on the specifications of the working GPU, cumar library will automately generate optimized CUDA code and ptx code in memory, then launch it.
-For a typical GTX 1080 GPU and array length of 11111, the generated files ard dumped under the `ptx` folder
+For a typical GTX 1080 GPU and an array length of 11111, the generated files are dumped s
 
 + [fxaudahpqbfwqg.cu](ptx/fxaudahpqbfwqg.cu)
 + [fxaudahpqbfwqg.cu.ptx](ptx/fxaudahpqbfwqg.cu.ptx)
