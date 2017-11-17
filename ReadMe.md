@@ -1,6 +1,8 @@
+# CUMAR
+
 CUMAR (CUDA MAp Reduce) is a pure C++ library accelerating [MapReduce](https://www.wikiwand.com/en/MapReduce) development on GPU, without the pain of CUDA.
 
-## Example Usage of [__map__](http://www.wikiwand.com/en/Map_(higher-order_function))
+### Example Usage of [__map__](http://www.wikiwand.com/en/Map_(higher-order_function))
 
 Let there be two vectors, A and B, of same length. To calculate their elementwise product C with a specified operation
 
@@ -88,7 +90,7 @@ For a typical GPU GTX 1080 and a very large array length `N=1111111`,  cuda will
 + [vmwesflblkspp.cu](ptx/vmwesflblkspp.cu)
 + [luusddxrbspjv.cu](ptx/luusddxrbspjv.cu)
 
-and launch them sequentially.
+then compile and launch them sequentially.
 
 
 
