@@ -25,8 +25,11 @@ For a typical GTX 1080 GPU and an array length `N = 11111`, a generated kernel c
 + [fxaudahpqbfwqg.cu](ptx/fxaudahpqbfwqg.cu)
 + [fxaudahpqbfwqg.cu.ptx](ptx/fxaudahpqbfwqg.cu.ptx)
 
+taking care of optimization details such as occupancy maximization, launch configuration optimization and thread divergence minimization.
 
-As a comparison, for the traditional way, at the first step we need to write some typical trivial host code:
+And tradition implementation as a comparison.
+
+host code:
 
 ```C++
 //main.cc
@@ -40,7 +43,7 @@ int N = ...;
 impl_operation( A, B, C, N );
 ```
 
-then the device code in CUDA:
+and the device code:
 
 ```CUDA
 // impl_operation.cu
