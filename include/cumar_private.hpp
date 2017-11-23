@@ -144,10 +144,11 @@ namespace cumar
             assert( N_ > 0 );
 
 
-            int const operation_threshold = 128;
+            //int const operation_threshold = 128;
             int const blocks = cumar_get_cores_per_processor();
             int const grids = cumar_get_processors();
             int const cores = blocks * grids;
+            int const operation_threshold = std::min( 2, grids );
 
             if ( cores > N_ )
             {
