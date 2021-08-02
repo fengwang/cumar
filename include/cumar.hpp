@@ -18,7 +18,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include "cumar_private.hpp"
 
-//TODO: move to file cumar_private.hpp
 std::tuple<std::string,std::string, std::string> make_map_code( std::string const& lambda_code_, unsigned long length_, unsigned long grids_, unsigned long blocks_, unsigned long operations_ );
 std::tuple<std::string,std::string, std::string> make_reduce_code( std::string const& lambda_code_, unsigned long length_, unsigned long grids_, unsigned long blocks_, unsigned long operations_ );
 
