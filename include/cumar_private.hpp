@@ -128,9 +128,9 @@ namespace cumar
         inline auto make_launcher( std::string const& ptx, std::string const& kernel_name, int const shared_memory = 0 )
         {
             assert( shared_memory >= 0 && "Shared memory size cannot be negative!" );
-            return [&]( auto&& ... dims ) noexcept
+            return [&, shared_memory]( auto&& ... dims ) noexcept
             {
-                return [&]( auto&& ... args ) noexcept
+                return [&, shared_memory]( auto&& ... args ) noexcept
                 {
                     auto&& ag = []( auto&& ... args_ ) noexcept { return std::array<void*,sizeof...(args_)>{ {reinterpret_cast<void*>(std::addressof(std::forward<decltype(args_)>(args_)))... }}; }( args... );
                     make_nvrtc_launcher( ptx.c_str(), kernel_name.c_str(), dims..., &ag[0], shared_memory );
